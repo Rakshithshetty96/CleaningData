@@ -47,6 +47,31 @@ names(dataFeatures)<- dataFeaturesNames$V2
 dataTemp<-cbind(dataSubject, dataActivity)
 Data <- cbind(dataFeatures, dataTemp)
 
+## Subset the names
+subdataFeaturesNames<-dataFeaturesNames$V2[grep("mean\\(\\)|std\\(\\)", dataFeaturesNames$V2)]
+
+
+selectedNames<-c(as.character(subdataFeaturesNames), "subject", "activity" )
+Data<-subset(Data,select=selectedNames)
+
+##Read descriptive activity labels
+activityLabels <- read.table(file.path(path_rf, "activity_labels.txt"),header = FALSE)
+Data$activity<- factor(Data$activity, labels = activityLabels$V2)
+head(Data$activity,30)
+
+##Label the data
+names(Data)<-gsub("^t", "time", names(Data))
+names(Data)<-gsub("^f", "frequency", names(Data))
+names(Data)<-gsub("Acc", "Accelerometer", names(Data))
+names(Data)<-gsub("Gyro", "Gyroscope", names(Data))
+names(Data)<-gsub("Mag", "Magnitude", names(Data))
+names(Data)<-gsub("BodyBody", "Body", names(Data))
+
+##Produce a tiny dataset
+
+Data2<-aggregate(. ~subject + activity, Data, mean)
+Data2<-Data2[order(Data2$subject,Data2$activity),]
+write.table(Data2, file = "tidydata.txt",row.name=FALSE)
 
 
 
